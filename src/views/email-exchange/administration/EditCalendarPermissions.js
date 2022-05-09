@@ -54,20 +54,13 @@ const EditCalendarPermission = () => {
   }, [userId, tenantDomain, dispatch])
   const [genericPostRequest, postResults] = useLazyGenericGetRequestQuery()
   const onSubmit = (values) => {
-    if (!values.AddFullAccess) {
-      values.AddFullAccess = ''
-    }
-    if (!values.RemoveFullAccess) {
-      values.RemoveFullAccess = ''
-    }
-    if (!values.AddFullAccessNoAutoMap) {
-      values.AddFullAccessNoAutoMap = ''
-    }
     const shippedValues = {
       FolderName: user[0].FolderName,
       userid: userId,
       tenantFilter: tenantDomain,
-      ...values,
+      Permissions: values.Permissions ? values.Permissions.value : '',
+      UserToGetPermissions: values.UserToGetPermissions ? values.UserToGetPermissions.value : '',
+      RemoveAccess: values.RemoveAccess ? values.RemoveAccess.value : '',
     }
     //window.alert(JSON.stringify(shippedValues))
     genericPostRequest({ path: '/api/ExecEditCalendarPermissions', params: shippedValues })
@@ -76,6 +69,12 @@ const EditCalendarPermission = () => {
 
   // this is dumb
   const formDisabled = queryError === true
+
+  const UsersMapped = users?.map((user) => ({
+    value: `${user.primarySmtpAddress}`,
+    name: `${user.displayName} - (${user.primarySmtpAddress})`,
+  }))
+  UsersMapped.unshift({ value: 'Default', name: 'Default' })
 
   return (
     <CCard className="page-card">
@@ -115,10 +114,7 @@ const EditCalendarPermission = () => {
                                 <RFFSelectSearch
                                   label="Remove Access"
                                   disabled={formDisabled}
-                                  values={users?.map((user) => ({
-                                    value: `${user.primarySmtpAddress}`,
-                                    name: `${user.displayName} - (${user.primarySmtpAddress})`,
-                                  }))}
+                                  values={UsersMapped}
                                   placeholder={!usersIsFetching ? 'Select user' : 'Loading...'}
                                   name="RemoveAccess"
                                 />
@@ -128,10 +124,7 @@ const EditCalendarPermission = () => {
                                 <RFFSelectSearch
                                   label="Add Access"
                                   disabled={formDisabled}
-                                  values={users?.map((user) => ({
-                                    value: `${user.primarySmtpAddress}`,
-                                    name: `${user.displayName} - (${user.primarySmtpAddress})`,
-                                  }))}
+                                  values={UsersMapped}
                                   placeholder={!usersIsFetching ? 'Select user' : 'Loading...'}
                                   name="UserToGetPermissions"
                                 />
